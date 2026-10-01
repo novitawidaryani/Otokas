@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OtoKas - Catat Keuangan Futuristik</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF & AutoTable CDN untuk Export PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- External CSS Styling -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-[#FFFDF5] text-[#364C84] min-h-screen pb-24">
+
+    <!-- TOP HEADER -->
+    <header class="sticky top-0 z-40 bg-[#FFFDF5]/90 backdrop-blur-md px-6 py-4 flex items-center justify-between border-b border-[#85B1EE]/20">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-2xl bg-[#85B1EE] flex items-center justify-center text-[#364C84] font-bold shadow-md shadow-[#85B1EE]/30">
+                OK
+            </div>
+            <div>
+                <h1 class="font-bold text-lg leading-tight">OtoKas</h1>
+                <p class="text-xs text-[#364C84]/70">Pencatat Keuangan Pintar</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER (SPA PAGES) -->
+    <main class="max-w-md mx-auto p-4 sm:p-6 space-y-6">
+
+        <!-- ================= PAGE: DASHBOARD ================= -->
+        <section id="page-dashboard" class="space-y-6">
+            <div class="bg-gradient-to-r from-[#85B1EE]/20 to-[#E7F1A8]/30 p-4 rounded-2xl border border-[#85B1EE]/30 text-xs sm:text-sm text-[#364C84]">
+                Kelola uang dengan cara yang lebih mudah bersama <span class="font-bold">OtoKas</span>. Pantau setiap pemasukan dan pengeluaran, lihat ke mana uangmu pergi, dan tetap kendalikan kondisi keuanganmu dalam satu platform.
+            </div>
+
+            <!-- WALLET CARD (SALDO UTAMA) -->
+            <div class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#364C84] to-[#22325c] text-[#FFFDF5] p-6 shadow-xl shadow-[#364C84]/20">
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-[#85B1EE]/20 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <p class="text-xs font-medium text-[#85B1EE] tracking-wider uppercase">Total Saldo Tersedia</p>
+                        <h2 id="dash-total-balance" class="text-3xl font-extrabold mt-1 tracking-tight">Rp 0</h2>
+                    </div>
+                    <span id="dash-status-badge" class="text-[10px] font-bold px-3 py-1 rounded-full shadow bg-[#E7F1A8] text-[#364C84]">Aman</span>
+                </div>
+                <div class="grid grid-cols-2 gap-4 pt-4 border-t border-[#FFFDF5]/10">
+                    <div>
+                        <p class="text-[11px] text-[#FFFDF5]/70">Pemasukan Bulan Ini</p>
+                        <p id="dash-month-income" class="text-sm font-bold text-[#E7F1A8] mt-0.5">Rp 0</p>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-[#FFFDF5]/70">Pengeluaran Bulan Ini</p>
+                        <p id="dash-month-expense" class="text-sm font-bold text-rose-300 mt-0.5">Rp 0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QUICK ACTIONS -->
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-[#85B1EE]/20 space-y-3">
+                <div>
+                    <h3 class="font-bold text-base text-[#364C84]">Aksi Cepat Transaksi</h3>
+                    <p class="text-xs text-gray-500">Catat pemasukan atau pengeluaran baru dengan cepat di sini.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-3 pt-1">
+                    <button onclick="openTransactionModal('Pemasukan')" class="flex items-center justify-center space-x-2 py-3 px-4 bg-[#E7F1A8]/55 hover:bg-[#E7F1A8] text-[#364C84] font-bold rounded-2xl transition border border-[#E7F1A8]">
+                        <span class="text-lg leading-none">+</span>
+                        <span class="text-sm">Catat Pemasukan</span>
+                    </button>
+                    <button onclick="openTransactionModal('Pengeluaran')" class="flex items-center justify-center space-x-2 py-3 px-4 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold rounded-2xl transition border border-rose-200">
+                        <span class="text-lg leading-none">+</span>
+                        <span class="text-sm">Catat Pengeluaran</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- PIE CHART -->
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-[#85B1EE]/20 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-base text-[#364C84]">Distribusi per Kategori</h3>
+                        <p class="text-xs text-gray-500">Proporsi transaksi berdasarkan kategori.</p>
+                    </div>
+                    <select id="chart-type-filter" onchange="renderCategoryPieChart()" class="text-xs bg-[#FFFDF5] border border-[#85B1EE]/40 rounded-xl px-2.5 py-1 text-[#364C84] font-semibold focus:outline-none">
+                        <option value="Pengeluaran">Pengeluaran</option>
+                        <option value="Pemasukan">Pemasukan</option>
+                    </select>
+                </div>
+                <div class="relative w-full h-56 flex items-center justify-center">
+                    <canvas id="categoryPieChart"></canvas>
+                </div>
+            </div>
+
+            <!-- LINE CHART -->
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-[#85B1EE]/20 space-y-4">
+                <div>
+                    <h3 class="font-bold text-base text-[#364C84]">Tren Pengeluaran Harian</h3>
+                    <p class="text-xs text-gray-500">Memantau pengeluaran dalam 7 hari terakhir.</p>
+                </div>
+                <div class="relative w-full h-52">
+                    <canvas id="dailyExpenseLineChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE: RIWAYAT ================= -->
+        <section id="page-riwayat" class="space-y-4 hidden">
+            <div class="flex items-start justify-between">
+                <div>
+                    <h2 class="font-bold text-xl text-[#364C84]">Riwayat Transaksi</h2>
+                    <p class="text-xs text-gray-500">Semua catatan arus kas masuk & keluar.</p>
+                </div>
+                <div class="flex flex-col items-end space-y-1.5">
+                    <span id="transaction-count" class="text-xs bg-[#85B1EE]/20 text-[#364C84] font-bold px-2.5 py-1 rounded-xl">0 item</span>
+                    <button onclick="openPDFModal()" class="text-[10px] bg-[#364C84] text-[#FFFDF5] font-bold px-3 py-1.5 rounded-lg shadow hover:bg-[#22325c] transition flex items-center space-x-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Unduh PDF</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-[#85B1EE]/20 space-y-3">
+                <div class="relative">
+                    <input type="text" id="search-input" oninput="filterTransactions()" placeholder="Cari nama transaksi atau catatan..." class="w-full text-sm bg-[#FFFDF5] border border-[#85B1EE]/30 rounded-xl px-3.5 py-2.5 text-[#364C84] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#85B1EE]">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <select id="filter-category" onchange="filterTransactions()" class="text-xs bg-[#FFFDF5] border border-[#85B1EE]/30 rounded-xl px-3 py-2 text-[#364C84] focus:outline-none">
+                        <option value="">Semua Kategori</option>
+                    </select>
+                    <select id="filter-date-range" onchange="filterTransactions()" class="text-xs bg-[#FFFDF5] border border-[#85B1EE]/30 rounded-xl px-3 py-2 text-[#364C84] focus:outline-none">
+                        <option value="all">Semua Waktu</option>
+                        <option value="today">Hari Ini</option>
+                        <option value="month">Bulan Ini</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="transaction-list" class="space-y-3"></div>
+        </section>
+
+        <!-- ================= PAGE: ANGGARAN ================= -->
+        <section id="page-anggaran" class="space-y-4 hidden">
+            <div>
+                <h2 class="font-bold text-xl text-[#364C84]">Batas Anggaran Bulanan</h2>
+                <p class="text-xs text-gray-500">Atur batas aman pengeluaran per kategori tiap bulan.</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-[#85B1EE]/20 space-y-3">
+                <h3 class="font-bold text-sm text-[#364C84]">Tambah / Update Limit Kategori</h3>
+                <form id="budget-form" onsubmit="handleBudgetSubmit(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Pilih Kategori Pengeluaran</label>
+                        <select id="budget-category" required class="w-full text-sm bg-[#FFFDF5] border border-[#85B1EE]/30 rounded-xl px-3 py-2.5 text-[#364C84] focus:outline-none"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Batas Maksimal (Rp)</label>
+                        <input type="number" id="budget-limit" placeholder="Contoh: 500000" min="1" required class="w-full text-sm bg-[#FFFDF5] border border-[#85B1EE]/30 rounded-xl px-3 py-2.5 text-[#364C84] focus:outline-none">
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-[#364C84] text-[#FFFDF5] font-bold rounded-xl text-sm shadow-md hover:bg-[#22325c] transition">
+                        Simpan Batas Anggaran
+                    </button>
+                </form>
+            </div>
+
+            <div class="space-y-3" id="budget-status-list"></div>
+        </section>
+
+    </main>
+
+    <!-- BOTTOM NAVIGATION BAR -->
+    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-md border-t border-[#85B1EE]/20 px-6 py-3 flex justify-around items-center z-40 rounded-t-3xl shadow-lg">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="flex flex-col items-center space-y-1 text-[#364C84] transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            <span class="text-[10px] font-bold">Dashboard</span>
+        </button>
+        <button onclick="switchTab('riwayat')" id="nav-riwayat" class="flex flex-col items-center space-y-1 text-gray-400 hover:text-[#364C84] transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+            <span class="text-[10px] font-semibold">Riwayat</span>
+        </button>
+        <button onclick="switchTab('anggaran')" id="nav-anggaran" class="flex flex-col items-center space-y-1 text-gray-400 hover:text-[#364C84] transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+            <span class="text-[10px] font-semibold">Anggaran</span>
+        </button>
+    </nav>
+
+    <!-- MODAL TRANSAKSI -->
+    <div id="transaction-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end justify-center hidden">
+        <div class="bg-white w-full max-w-md rounded-t-[2.5rem] p-6 space-y-4 max-h-[90vh] overflow-y-auto animate-in fade-in slide-in-from-bottom duration-200">
+            <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+                <h3 id="modal-title" class="font-bold text-lg text-[#364C84]">Catat Transaksi</h3>
+                <button onclick="closeTransactionModal()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center font-bold">×</button>
+            </div>
+            <form id="transaction-form" onsubmit="handleTransactionSubmit(event)" class="space-y-3">
+                <input type="hidden" id="tx-id" value="">
+                <input type="hidden" id="tx-type" value="Pengeluaran">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nama Transaksi</label>
+                    <input type="text" id="tx-name" placeholder="Misal: Beli komponen dioda / Gaji bulanan" required class="w-full text-sm bg-[#FFFDF5] border border-[#85B1EE]/30 rounded-xl px-3.5 py-2.5 text-[#364C84] focus:outline-none focus:ring-2 focus:ring-[#85B1EE]">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nominal (Rp)</label>
+                    <input type="number" id="tx-amount" placeholder="Contoh: 50000" min="1" required class="w-full text-sm bg-[#FFFDF5] border border-[#85B1EE]/30 rounded-xl px-3.5 py-2.5 text-[#364C84] focus:outline-none focus:ring-2 focus:ring-[#85B1EE]">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Tanggal</label>
+                    <input type="date" id="tx-date" required class="w-full text-sm bg-[#FFFDF5] border border-[#85B1EE]/30 rounded-xl px-3.5 py-2.5 text-[#364C84] focus:outline-none focus:ring-2 focus:ring-[#85B1EE]">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Kategori</label>
+                    <select id="tx-category" onchange="checkCustomCategory(this)" required class="w-full text-sm bg-[#FFFDF5] border border-[#85B1EE]/30 rounded-xl px-3.5 py-2.5 text-[#364C84] focus:outline-none focus:ring-2 focus:ring-[#85B1EE]"></select>
+                </div>
+                <div id="custom-category-wrapper" class="hidden">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nama Kategori Baru</label>
+                    <input type="text" id="tx-custom-category" placeholder="Misal: Komponen Praktikum" class="w-full text-sm bg-[#FFFDF5] border border-[#85B1EE]/30 rounded-xl px-3.5 py-2.5 text-[#364C84] focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Catatan Singkat (Opsional)</label>
+                    <textarea id="tx-note" rows="2" placeholder="Catatan tambahan..." class="w-full text-sm bg-[#FFFDF5] border border-[#85B1EE]/30 rounded-xl px-3.5 py-2.5 text-[#364C84] focus:outline-none"></textarea>
+                </div>
+                <button type="submit" class="w-full py-3.5 bg-[#364C84] text-[#FFFDF5] font-bold rounded-2xl text-sm shadow-lg shadow-[#364C84]/20 hover:bg-[#22325c] transition mt-2">
+                    Simpan Transaksi
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL FILTER PDF -->
+    <div id="pdf-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 space-y-4 shadow-xl mx-4">
+            <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+                <h3 class="font-bold text-lg text-[#364C84]">Filter Laporan PDF</h3>
+                <button onclick="closePDFModal()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center font-bold">×</button>
+            </div>
+            <form id="pdf-form" onsubmit="handlePDFDownload(event)" class="space-y-3">
+                <p class="text-xs text-gray-500 mb-2">Kosongkan filter jika ingin mengunduh seluruh data.</p>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Filter Kategori</label>
+                    <select id="pdf-category" class="w-full text-sm bg-[#FFFDF5] border border-[#85B1EE]/30 rounded-xl px-3.5 py-2.5 text-[#364C84] focus:outline-none focus:ring-2 focus:ring-[#85B1EE]">
+                        <option value="">Semua Kategori</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Dari Tanggal</label>
+                        <input type="date" id="pdf-start-date" class="w-full text-sm bg-[#FFFDF5] border border-[#85B1EE]/30 rounded-xl px-3 py-2 text-[#364C84] focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Sampai Tanggal</label>
+                        <input type="date" id="pdf-end-date" class="w-full text-sm bg-[#FFFDF5] border border-[#85B1EE]/30 rounded-xl px-3 py-2 text-[#364C84] focus:outline-none">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3.5 bg-[#364C84] text-[#FFFDF5] font-bold rounded-xl text-sm shadow-md hover:bg-[#22325c] transition mt-2 flex items-center justify-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    <span>Download Sekarang</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- External JavaScript Logic -->
+    <script src="script.js"></script>
+</body>
+</html>
